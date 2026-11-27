@@ -1,0 +1,22 @@
+{
+  "name": "forever-guide",
+  "version": "0.1.0",
+  "description": "Answers WoW Forever questions with the `forever` command line: your own character (ForeverBridge add-on), your own Auctionator prices, and Forever's items, quests, vendors and places, with Classic data only where labelled.",
+  "author": {
+    "name": "Mariachi Code"
+  },
+  "license": "MIT",
+  "keywords": [
+    "wow-forever",
+    "game-guide",
+    "twink",
+    "auction-prices"
+  ],
+  "network": {
+    "hosts": [
+      "foreverdb.net",
+      "nether.wowhead.com",
+      "wago.tools"
+    ]
+  }
+}

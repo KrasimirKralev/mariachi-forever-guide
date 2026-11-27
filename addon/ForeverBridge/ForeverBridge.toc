@@ -1,0 +1,8 @@
+## Interface: 16000, 16001, 16002, 16003
+## Title: ForeverBridge
+## Notes: A snapshot of YOUR OWN character (gear, stats, skills, reputation, quests, recipes, what trainers and vendors list) in one local file, for the Forever Guide on your PC. No chat, no other players, nothing is sent anywhere.
+## Author: Mariachi Code
+## Version: 1.1
+## SavedVariables: ForeverBridgeDB
+
+ForeverBridge.lua

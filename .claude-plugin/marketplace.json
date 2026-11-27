@@ -1,0 +1,15 @@
+{
+  "name": "mariachi-forever-guide",
+  "version": "0.1.0",
+  "description": "Mariachi Code, Forever Guide: a Claude Code plugin that answers WoW Forever questions from your own character and Forever's own data.",
+  "owner": {
+    "name": "Mariachi Code"
+  },
+  "plugins": [
+    {
+      "name": "forever-guide",
+      "source": "./plugin",
+      "description": "Teaches Claude to use the `forever` command line: your character from the ForeverBridge add-on, your Auctionator prices, and Forever's items, quests and places."
+    }
+  ]
+}

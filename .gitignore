@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+dist/
+build/
+*.zip
+*.db
+*.sqlite
+*.csv
+*.wdb
+*.tmp
+*.part
+.venv/
+venv/
+node_modules/
+.DS_Store
+# a player's own files never belong here
+ForeverBridge.lua.bak
+Auctionator.lua
+SavedVariables/

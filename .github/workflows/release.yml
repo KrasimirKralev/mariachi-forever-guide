@@ -1,0 +1,96 @@
+# Builds the player zip and publishes it as a GitHub Release when a version tag (v0.1.0, ...) is pushed.
+# Players get one link: releases/latest/download/mariachi-forever-guide.zip (the same bytes as the versioned zip;
+# SHA256SUMS and the release notes carry the checksum). The job that can write to the repository runs no project
+# code: it only publishes what the read-only build job made.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04  # pinned: a moving image can lose the Python 3.9 that setup-python must find
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.9'
+      - name: Lua for the add-on tests
+        run: sudo apt-get update && sudo apt-get install -y luajit
+      - name: Private and third-party material scan (before anything writes byte code)
+        # CI cannot hold the owner's private words, so this step prints "private words: NOT CHECKED";
+        # the owner runs the scan with --words on his own PC before he tags a release.
+        # a step runs as `bash -e` without pipefail: without it the scan's exit code would be lost in the pipe
+        run: |
+          set -o pipefail
+          python -I -B scripts/scan_private.py | tee scan.txt
+          grep -q 'private words: NOT CHECKED' scan.txt
+      - name: Tests (no network, temp folders only)
+        run: python -I -B -m unittest -v
+      - name: The tag matches the version
+        run: |
+          version=$(python -I -c "import re; print(re.search(r\"^VERSION = '([^']+)'\", open('forever/__init__.py').read(), re.M).group(1))")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME does not match VERSION $version"; exit 1; }
+      - name: Build the zips and their checksums
+        run: |
+          python -I -B scripts/package.py --out dist
+          cat dist/SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+
+  # Windows, macOS and the newest Python: reported here, without blocking a release (not yet run by hand).
+  other-systems:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - name: Tests
+        run: python -I -B -m unittest -v
+
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release
+          path: dist
+      - name: Publish the release with the checksums in its notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          {
+            echo "Download mariachi-forever-guide.zip, unzip it and run: python forever setup. See README.md."
+            echo
+            echo "SHA-256 (SHA256SUMS):"
+            echo '```'
+            cat dist/SHA256SUMS
+            echo '```'
+          } > notes.md
+          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/SHA256SUMS \
+            --repo "$REPO" \
+            --title "Mariachi Code, Forever Guide $GITHUB_REF_NAME" \
+            --notes-file notes.md

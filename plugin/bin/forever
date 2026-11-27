@@ -1,0 +1,38 @@
+#!/bin/sh
+# `forever` for Claude Code: while the forever-guide plugin is enabled, this folder is on the Bash tool's PATH.
+# It runs the Forever Guide from the folder it was unzipped to: `python forever setup` writes that folder (and the
+# Python that ran it) into launcher.txt in the tool's config folder. No login, key or credential is read here.
+APP=mariachi-forever-guide
+VERSION=0.1.0
+if [ -n "$FOREVER_CONFIG_DIR" ]; then
+  conf=$FOREVER_CONFIG_DIR
+elif [ -n "$APPDATA" ]; then
+  conf=$APPDATA/$APP
+elif [ "$(uname -s 2>/dev/null)" = Darwin ]; then
+  conf="$HOME/Library/Application Support/$APP"
+else
+  conf=${XDG_CONFIG_HOME:-$HOME/.config}/$APP
+fi
+note=$conf/launcher.txt
+if [ ! -r "$note" ]; then
+  echo "forever: not set up yet. Unzip the Forever Guide and run, in that folder:  python forever setup" >&2
+  exit 127
+fi
+{ IFS= read -r py; IFS= read -r dir; } < "$note"
+py=$(printf '%s' "$py" | tr -d '\r')
+dir=$(printf '%s' "$dir" | tr -d '\r')
+if [ ! -f "$dir/forever/__main__.py" ]; then
+  # no folder name here: what this prints reaches Claude, and the path holds the user's name
+  echo "forever: the Forever Guide folder has moved: run  python forever setup  in its new folder" >&2
+  exit 127
+fi
+# the plugin comes from GitHub and the folder from the zip: say so when the two are not the same version
+kit=$(sed -n "s/^VERSION = '\(.*\)'.*/\1/p" "$dir/forever/__init__.py" 2>/dev/null)
+if [ -n "$kit" ] && [ "$kit" != "$VERSION" ]; then
+  echo "forever: the Claude plugin is $VERSION and the Forever Guide folder is $kit: update the older one" >&2
+fi
+if [ ! -x "$py" ] && ! command -v "$py" >/dev/null 2>&1; then
+  py=python3
+  command -v python3 >/dev/null 2>&1 || py=python
+fi
+exec "$py" -B -I "$dir/forever" "$@"
