@@ -105,7 +105,8 @@ class Store:
     def quest_cache_path(self):
         if not self.game:
             return None
-        found = glob.glob(os.path.join(glob.escape(self.game), 'Cache', 'WDB', '*', 'questcache.wdb'))
+        found = [p for p in glob.glob(os.path.join(glob.escape(self.game), 'Cache', 'WDB', '*', 'questcache.wdb'))
+                 if os.path.exists(p)]  # a dangling link is no quest cache
         return max(found, key=os.path.getmtime) if found else None
 
     # ---- what the data is and how old ----------------------------------------------------------------------

@@ -129,12 +129,18 @@ def _home_pattern(homes, system):
     return re.compile(r'(?<![\w.~-])(?:%s)(?=[/\\]|$|[\'"\s:;,)]|\.(?=\s|$))' % alternatives, flags)
 
 
+def debug(env=None):
+    """FOREVER_DEBUG is on unless it is unset or "", "0", "false", "no" or "off" (in any case)."""
+    env = os.environ if env is None else env
+    return (env.get('FOREVER_DEBUG') or '').strip().lower() not in ('', '0', 'false', 'no', 'off')
+
+
 def mask(text, env=None, system=None):
     """Any text (an error's message, a path) with EVERY occurrence of the home folder shown as ~ and of a WoW
     account folder as <account>; FOREVER_DEBUG=1 leaves it as it is."""
     env = os.environ if env is None else env
     text = str(text)
-    if env.get('FOREVER_DEBUG'):
+    if debug(env):
         return text
     system = _system(system)
     # on Windows both may name the home, HOME (Git Bash's) perhaps with the other slash
@@ -227,7 +233,8 @@ def _wow_root(path):
     path = path.rstrip('/\\')
     base = os.path.basename(path.replace('\\', '/'))
     if base.startswith('_') and base.endswith('_'):
-        return os.path.dirname(path.replace('\\', '/'))
+        # in this system's own separators: on Windows backslashes throughout, never a "/" mixed in
+        return os.path.normpath(os.path.dirname(path.replace('\\', '/')))
     return path
 
 

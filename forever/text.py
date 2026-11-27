@@ -1,5 +1,20 @@
-"""Small text helpers shared by every command: money, ages, numbers."""
+"""Small text helpers shared by every command: printable text, money, ages, numbers."""
 import time
+import unicodedata
+
+# control (but tab and newline), format (zero-width, bidi, the tag block, soft hyphen, BOM), surrogate, private use,
+# unassigned
+REMOVED = ('Cc', 'Cf', 'Cs', 'Co', 'Cn')
+
+
+def printable(s):
+    """Text as it may reach a terminal and Claude: names and texts from other sites and files may hold terminal
+    sequences or invisible characters, so those go; the line and paragraph separators become newlines. Letters of
+    every script, digits, punctuation, symbols, combining marks and spaces stay."""
+    if s.isprintable():
+        return s
+    return ''.join('\n' if c in '\u2028\u2029' else c for c in s
+                   if c in '\t\n' or unicodedata.category(c) not in REMOVED)
 
 
 def money(copper):

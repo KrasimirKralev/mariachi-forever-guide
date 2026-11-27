@@ -23,9 +23,10 @@
   the Wine, Lutris, Bottles and Steam prefixes) and, on Windows, three registry keys of the game's installer
   (Blizzard Entertainment\World of Warcraft InstallPath, also under WOW6432Node, and its Uninstall entry's
   InstallLocation), read-only. Everything read from disk or the network is parsed as data (Lua tables, CBOR, CSV,
-  JSON); nothing is ever run. Printed paths show your home folder as `~` and the WoW account folder as
-  `<account>`, except the one line of setup that you paste into Claude Code (the toolkit folder, in full), and
-  when you set FOREVER_DEBUG=1 yourself.
+  JSON); nothing is ever run. Text from other sites and files is printed with control characters and Unicode
+  format characters (zero-width, direction and tag characters) removed. Printed paths show your home folder as
+  `~` and the WoW account folder as `<account>`, except the one line of setup that you paste into Claude Code
+  (the toolkit folder, in full), and when you set FOREVER_DEBUG=1 yourself.
 - **Credentials:** none. There is no login, token or API key anywhere in this repository. Claude runs in your own
   Claude Code with your own sign-in, which this tool never sees.
 - **The add-on** records only your own character, never chat, whispers or other players, and cannot reach the

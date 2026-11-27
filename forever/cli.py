@@ -15,7 +15,7 @@ import os
 import sys
 import traceback
 
-from . import CREDITS, PRODUCT, VERSION, installer, net, paths, prices, snapshot
+from . import CREDITS, PRODUCT, VERSION, installer, net, paths, prices, snapshot, text
 from .data import Store
 from .lookup import Lookup
 
@@ -117,6 +117,12 @@ def cmd_version(args, env, out):
     return 0
 
 
+def printed(out):
+    """The one way out: every line any command prints passes through text.printable (names, quest texts and tooltips
+    come from other sites and files)."""
+    return lambda line='': out(text.printable(str(line)))
+
+
 def main(argv=None, env=None, out=None):
     env = os.environ if env is None else env
     if out is None:
@@ -131,6 +137,7 @@ def main(argv=None, env=None, out=None):
 
         def out(line=''):
             print(line, flush=True)
+    out = printed(out)
     args = parser().parse_args(argv)
     if not args.command:
         parser().print_help()
@@ -166,8 +173,8 @@ def main(argv=None, env=None, out=None):
         return 130
     except Exception as e:  # a friendly line for the player, the details only when asked for
         out('forever: something went wrong: %s: %s' % (type(e).__name__, paths.describe(e, env)))
-        if env.get('FOREVER_DEBUG'):
-            traceback.print_exc()
+        if paths.debug(env):
+            sys.stderr.write(text.printable(traceback.format_exc()))
         else:
             out('(run again with FOREVER_DEBUG=1 for the details)')
         return 1

@@ -304,7 +304,9 @@ class S4Brackets(Base):
     def setUp(self):
         self.t = fixtures.TempEnv().__enter__()
         self.addCleanup(self.t.__exit__)
-        self.game = fixtures.fake_game(os.path.join(self.t.root, 'brackets [SSD] *?'))
+        # Windows allows no * or ? in a folder name; [SSD] still is a glob pattern there
+        name = 'brackets [SSD]' if os.name == 'nt' else 'brackets [SSD] *?'
+        self.game = fixtures.fake_game(os.path.join(self.t.root, name))
         self.cache = self.t.env['FOREVER_CACHE_DIR']
         self.lines = []
 

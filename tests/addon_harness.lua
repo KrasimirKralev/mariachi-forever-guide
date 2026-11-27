@@ -269,7 +269,7 @@ elseif variant == "legacy" then
   function GetContainerItemInfo(_, slot) if slot == 1 then return "tex", 20, false, 1, false, false, link(920001, "Mock Salt", "ffffffff") end end
   function GetNumTradeSkills() return 3 end
   function GetTradeSkillLine() return "Tailoring", 100, 150 end
-  function GetTradeSkillInfo(i) if i == 1 then return "Leather", "header" end return i == 2 and "Mock Bolt of Silk" or "Mock Belt", i == 2 and "easy" or "optimal", 5 end
+  function GetTradeSkillInfo(i) if i == 1 then return "Cloth", "header" end return i == 2 and "Mock Bolt of Silk" or "Mock Belt", i == 2 and "easy" or "optimal", 5 end
   function GetTradeSkillItemLink(i) return link(i == 2 and 920005 or 920006, "x", "ffffffff") end
   function GetNumTradeSkillReagents() return 2 end
   function GetTradeSkillReagentInfo(_, j) return "r", "t", 1, 5 end
